@@ -11,9 +11,20 @@ describe('Game5', function () {
   it('should be a winner', async function () {
     const { game } = await loadFixture(deployContractAndSetVariables);
 
-    // good luck
+    // Get address < target address
+    let wallet = ethers.Wallet.createRandom();
+    while(BigInt(wallet.address) >= BigInt("0x00FfFFfFFFfFFFFFfFfFfffFFFfffFfFffFfFFFf")) {
+      wallet = ethers.Wallet.createRandom();
+    }
 
-    await game.win();
+    // Send money to the address
+    const signer = ethers.provider.getSigner(0);
+    await signer.sendTransaction({
+      to: wallet.address,
+      value: ethers.utils.parseEther("1")
+    });
+
+    await game.connect(wallet.connect(ethers.provider)).win();
 
     // leave this assertion as-is
     assert(await game.isWon(), 'You did not win the game');
